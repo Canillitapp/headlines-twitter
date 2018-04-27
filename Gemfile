@@ -1,4 +1,5 @@
 source 'https://rubygems.org'
 
-gem 'chatterbot'
 gem 'json'
+gem 'twitter'
+gem 'rufus-scheduler'

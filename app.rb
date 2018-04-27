@@ -1,27 +1,47 @@
 require 'net/http'
 require 'json'
-require 'chatterbot/dsl'
+require 'date'
+require 'twitter'
+require 'rufus-scheduler'
 
-use_streaming
+def generate_news_tweets
+  tweets = []
 
-replies do |tweet|
-  begin
-    next unless tweet.text =~ /^@canillitapp buscar /
+  today = DateTime.now.new_offset('-03:00')
+  today_string = today.strftime '%Y-%m-%d'
+  url = "#{ENV['CANILLITAPP_API']}/trending/#{today_string}/3"
+  uri = URI(url)
+  response = Net::HTTP.get(uri)
+  json = JSON.parse(response)
 
-    search = tweet.text.gsub(/^@canillitapp buscar /, '')
-    uri = URI(URI.escape("http://api.canillitapp.com/search/#{search}"))
-    response = Net::HTTP.get(uri)
+  # Resumen
+  tweets << "Los temas destacados del momento son: #{json['keywords'].join(', ')} https://www.canillitapp.com/#{today_string}"
 
-    json = JSON.parse(response).take(3).each do |news|
-      src = "#USER# No encontré resultados con #{search} ^B"
-      unless news.nil?
-        title = news['title'].length > 100 ? "#{news['title'][0, 100]} (..)" : news['title']
-        src = "#USER# '#{title}' #{news['url']} ^B"
-      end
+  # Detalle
+  json['news'].keys.take(3).each_with_index do |k, i|
+    text = "##{k}: #{json['news'][k][0]['title']}"
+    news_url = "https://www.canillitapp.com/article/#{json['news'][k][0]['news_id']}?source=twitter"
+    tweets << "#{text[0,230]} #{news_url}"
+  end
 
-      reply src, tweet
-    end
-  rescue => e
-    puts e
+  tweets
+end
+
+client = Twitter::REST::Client.new do |config|
+  config.consumer_key        = ENV['TWITTER_CONSUMER_KEY']
+  config.consumer_secret     = ENV['TWITTER_CONSUMER_SECRET']
+  config.access_token        = ENV['TWITTER_ACCESS_TOKEN']
+  config.access_token_secret = ENV['TWITTER_ACCESS_TOKEN_SECRET']
+end
+
+scheduler = Rufus::Scheduler.new
+
+scheduler.cron '0 10,18,21 * * *' do
+  generate_news_tweets.each do |t|
+    #client.update t
+    puts t.to_json
   end
 end
+
+scheduler.join
+
