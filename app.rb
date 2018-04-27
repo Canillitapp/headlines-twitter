@@ -36,10 +36,9 @@ end
 
 scheduler = Rufus::Scheduler.new
 
-scheduler.cron '0 10,18,21 * * *' do
+scheduler.cron '0 10,18,20,21 * * *' do
   generate_news_tweets.each do |t|
-    #client.update t
-    puts t.to_json
+    client.update t
   end
 end
 
