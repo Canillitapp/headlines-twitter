@@ -14,9 +14,6 @@ def generate_news_tweets
   response = Net::HTTP.get(uri)
   json = JSON.parse(response)
 
-  # Resumen
-  tweets << "Los temas destacados del momento son: #{json['keywords'].join(', ')} https://www.canillitapp.com/#{today_string}"
-
   # Detalle
   json['news'].keys.take(3).each_with_index do |k, i|
     text = "##{k}: #{json['news'][k][0]['title']}"
@@ -36,7 +33,7 @@ end
 
 scheduler = Rufus::Scheduler.new
 
-scheduler.cron '0 10,18,21 * * *' do
+scheduler.cron '0 10,18,22 * * *' do
   generate_news_tweets.each do |t|
     client.update t
     puts t
