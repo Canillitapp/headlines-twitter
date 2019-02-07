@@ -9,13 +9,13 @@ def generate_news_tweets
 
   today = DateTime.now.new_offset('-03:00')
   today_string = today.strftime '%Y-%m-%d'
-  url = "#{ENV['CANILLITAPP_API']}/trending/#{today_string}/3"
+  url = "#{ENV['CANILLITAPP_API']}/trending/#{today_string}/5"
   uri = URI(url)
   response = Net::HTTP.get(uri)
   json = JSON.parse(response)
 
   # Detalle
-  json['news'].keys.take(3).each_with_index do |k, i|
+  json['news'].keys.take(5).each_with_index do |k, i|
     text = "##{k}: #{json['news'][k][0]['title']}"
     news_url = "https://www.canillitapp.com/article/#{json['news'][k][0]['news_id']}?source=twitter"
     tweets << "#{text[0,230]} #{news_url}"
