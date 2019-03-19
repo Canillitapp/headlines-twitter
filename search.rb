@@ -16,6 +16,8 @@ rest_client = Twitter::REST::Client.new do |config|
   config.access_token_secret = ENV['TWITTER_ACCESS_TOKEN_SECRET']
 end
 
+tries = 5
+
 stream_client.filter(track: 'canillitapp') do |object|
   begin
     canillitapp_match_regex = /^@canillitapp \/buscar .+/i
@@ -50,7 +52,9 @@ stream_client.filter(track: 'canillitapp') do |object|
   # trying to handle disconnect events https://github.com/sferik/twitter/issues/535
   rescue EOFError => e
     if (tries -= 1) > 0
+      puts e
       sleep 10
+      puts 'retrying...'
       retry
     else
       raise e
