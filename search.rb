@@ -46,7 +46,18 @@ stream_client.filter(track: 'canillitapp') do |object|
         end
       end
     end
+  
+  # trying to handle disconnect events https://github.com/sferik/twitter/issues/535
+  rescue EOFError => e
+    if (tries -= 1) > 0
+      sleep 10
+      retry
+    else
+      raise e
+    end
+
   rescue => e
     puts e
   end
+
 end
