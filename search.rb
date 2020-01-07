@@ -21,8 +21,8 @@ tries = MAX_RETRIES
 
 stream_client.filter(track: 'canillitapp') do |object|
   begin
-    canillitapp_match_regex = /^@canillitapp \/buscar .+/i
-    canillitapp_replace_regex = /^@canillitapp \/buscar /i
+    canillitapp_match_regex = /^@canillitapp s .+/i
+    canillitapp_replace_regex = /^@canillitapp s /i
 
     if object.is_a?(Twitter::Tweet)
       puts object.text
